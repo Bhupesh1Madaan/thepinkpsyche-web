@@ -305,7 +305,8 @@
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      max-width: 820px;
+      justify-content: space-between;
+      max-width: 1000px;
       width: 100%;
       text-align: left;
       padding: 0 1rem;
@@ -327,6 +328,7 @@
       font-size: .65rem;
       letter-spacing: 1.5px;
       text-transform: uppercase;
+      margin-left: auto;
       color: rgba(253, 246, 238, .4);
       max-width: 160px;
       text-align: right;
@@ -614,18 +616,24 @@
       background: rgba(232, 146, 124, .08);
     }
 
-    .pricing-badge {
+    /* Wrap for best value option */
+    .best-value-wrap {
+      position: relative;
+      margin-top: 1rem;
+    }
+
+    /* Inline badge */
+    .inline-badge {
       position: absolute;
-      top: -13px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: -10px;
+      left: 300px;
       background: var(--rose);
       color: var(--dark);
       font-size: .52rem;
       letter-spacing: .15em;
       text-transform: uppercase;
       font-weight: 700;
-      padding: .3rem .9rem;
+      padding: .25rem .7rem;
       border-radius: 999px;
       white-space: nowrap;
     }
@@ -1578,7 +1586,7 @@
     <!-- ═══ 2: REFRAME ═══ -->
     <div class="panel" id="panel-2">
       <p class="eyebrow fu" style="margin-bottom:1.2rem;">The Reframe</p>
-      <h1 class="reframe-title fu" style="margin-bottom:1.5rem;">healing gave you <em>awareness</em><br>awareness is not the
+      <h1 class="reframe-title fu" style="margin-bottom:1.5rem;">Healing gave you <em>awareness</em><br>Awareness is not the
         same as <em>authorship</em></h1>
       <p class="reframe-text fu" style="margin-bottom:2.5rem;">We are in the post-healing era. The women who arrive here
         have done the work — years of it. The problem is not that
@@ -1764,7 +1772,6 @@
     
         <!-- PREMIUM -->
         <div class="pricing-card featured">
-          <div class="pricing-badge">Best Value</div>
           <div class="pricing-type">PREMIUM</div>
           <div class="pricing-name">1-1 Identity Consulting</div>
         
@@ -1780,10 +1787,14 @@
               <span>Starter — 2 Sessions (₹4,999)</span>
             </label>
         
-            <label>
-              <input type="radio" name="package" value="Committed">
-              <span>Committed — 4 Sessions (₹6,999)</span>
-            </label>
+            <div class="best-value-wrap">
+              <div class="inline-badge">Best Value</div>
+            
+              <label>
+                <input type="radio" name="package" value="Committed">
+                <span>Committed — 4 Sessions (₹6,999)</span>
+              </label>
+            </div>
           </div>
         
           <div class="card-cta-wrap">
@@ -1967,7 +1978,7 @@
       og.add(o);
     }
 
-    // Walls
+    // Walls Bg- Pillars small ones
     function makeWall(side) {
       const g = new THREE.Group();
       for (let z = 20; z > -50; z -= 4) {
