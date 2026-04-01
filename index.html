@@ -1119,9 +1119,9 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(.88);
-      width: min(780px, 92vw);
       max-height: 85vh;
-      background: linear-gradient(145deg, #1e100a, #2a1510);
+      background: linear-gradient(145deg, #0a0e1a, #13182e) !important;
+      width: min(1000px, 95vw) !important;
       border: 1px solid rgba(232, 146, 124, .2);
       border-radius: 28px;
       z-index: 201;
@@ -1871,6 +1871,22 @@
       margin-bottom: .15rem;
     }
 
+  .blog-modal {
+    background: linear-gradient(145deg, #0a0e1a, #13182e) !important; /* Dark Blueish */
+    width: min(1000px, 95vw) !important; /* Thoda wide rakhenge grid ke liye */
+  }
+  
+  /* Blog Grid inside Modal */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 2rem;
+  }
+  
+
     .apply-pkg-price {
       font-size: .68rem;
       color: rgba(253, 246, 238, .45);
@@ -2162,17 +2178,11 @@
 
     <!-- ═══ 3: BLOGS ═══ -->
     <div class="panel" id="panel-3">
-      <p class="section-label fu" style="margin-bottom:.8rem;">From the Community</p>
-      <h2 class="big-title fu" style="margin-bottom:1.6rem;">Stories That<br><em>Move You</em></h2>
-
-      <!-- Status line: shows "Live from Sheets" or hidden -->
-      <div class="cards-status fu" id="cardsStatus" style="display:none;">
-        <div class="status-dot"></div>
-        <span id="cardsStatusText">Loading from Google Sheets...</span>
+      <p class="section-label fu" style="margin-bottom:.8rem;">Explore by Theme</p>
+      <h2 class="big-title fu" style="margin-bottom:1.6rem;">Choose Your <em>Path</em></h2>
+    
+      <div class="cards-row fu" id="categoryContainer">
       </div>
-
-      <!-- Cards container — populated by JS -->
-      <div id="cardsContainer" class="fu"></div>
     </div>
 
     <!-- ═══ 4: MIRROR METHOD ═══ -->
@@ -2361,6 +2371,22 @@
       },
     ];
 
+    const DUMMY_BLOGS = [
+        { id: 0, tag: '✦ Real Story', title: 'How I Left My 9–5 and Built Something Mine', excerpt: 'She had everything society said she should want. Until she chose herself.' },
+        { id: 1, tag: '✦ Real Story', title: 'The Silent Cost of Corporate Compliance', excerpt: 'When the paycheck is high but the soul is shrinking.' },
+        { id: 2, tag: '✦ Inspiration', title: "Boundaries Are Not a Luxury. They're a Right.", excerpt: 'Learning to say no was the most radical act of self-love.' },
+        { id: 3, tag: '✦ Inspiration', title: 'The Power of Psychological Adulthood', excerpt: 'How to stop asking for permission to live your own life.' },
+        { id: 4, tag: '✦ Blog', title: 'Why Women Need Rooms of Their Own — Online', excerpt: 'Digital spaces shaped by and for women are essential.' },
+        { id: 5, tag: '✦ Blog', title: 'The Mirror Method: A Framework for Identity', excerpt: 'How to rebuild your self-image from the ground up.' },
+        { id: 6, tag: '✦ Real Story', title: 'Starting Over at 35: A Memoir', excerpt: 'Its never too late to rewrite your contract with life.' }
+      ];
+
+      const CATEGORIES = [
+        { name: 'Real Stories', slug: 'real-story', icon: '✦' },
+        { name: 'Inspiration', slug: 'inspiration', icon: '⚡' },
+        { name: 'Frameworks', slug: 'blog', icon: '🔍' }
+      ];
+
     // ══════════════════════════════════════
     //  LIVE BLOGS — populated by fetch
     // ══════════════════════════════════════
@@ -2429,6 +2455,19 @@
       };
     }
 
+    function renderCategories() {
+        const container = document.getElementById('categoryContainer');
+        container.innerHTML = CATEGORIES.map(cat => `
+    <div class="story-card category-card" data-category="${cat.slug}">
+      <span class="card-tag">${cat.icon}</span>
+      <div class="card-title">${cat.name}</div>
+      <div class="card-excerpt">Explore all writings under ${cat.name}.</div>
+    </div>
+  `).join('');
+
+        bindUIEvents();
+      }
+
     // ── Render skeleton cards while loading ────────────────────────
     function renderSkeletons() {
       const container = document.getElementById('cardsContainer');
@@ -2450,58 +2489,59 @@
         </div>`;
     }
 
-    // Grass texture
-    // function createGrassTexture() {
-    //   const c = document.createElement('canvas')
-    //   c.width = 512; c.height = 512
-    //   const ctx = c.getContext('2d')
-    //   ctx.fillStyle = '#154f0a'; ctx.fillRect(0, 0, 512, 512)
-    //   for (let i = 0; i < 25000; i++) {
-    //     ctx.fillStyle = `rgba(130,190,80,${Math.random() * 0.3})`
-    //     ctx.fillRect(Math.random() * 512, Math.random() * 512, 1, 3)
-    //   }
-    //   const tex = new THREE.CanvasTexture(c)
-    //   tex.wrapS = tex.wrapT = THREE.RepeatWrapping
-    //   tex.repeat.set(12, 24)
-    //   return tex
-    // }
+    function openCategoryModal(categorySlug) {
+        // Filter blogs by tag name
+        const filtered = DUMMY_BLOGS.filter(b => b.tag.toLowerCase().includes(categorySlug));
+        const mBody = document.getElementById('mBody');
+        const mTitle = document.getElementById('mTitle');
+        const bMo = document.getElementById('blogModal');
 
-    // ── Render actual cards from BLOGS array ───────────────────────
-    function renderCards(fromSheets) {
-      const container = document.getElementById('cardsContainer');
-      const statusEl = document.getElementById('cardsStatus');
-      const statusTxt = document.getElementById('cardsStatusText');
+        mTitle.textContent = categorySlug.toUpperCase().replace('-', ' ');
+        document.getElementById('recentSidebar').style.display = 'none'; // Hide sidebar in category view
 
-      if (fromSheets && BLOGS.length > 0) {
-        statusEl.style.display = 'flex';
-        statusTxt.textContent = `${BLOGS.length} ${BLOGS.length !== 1 ? 'stories' : 'story'} from the community`;
-        // stop blink once loaded
-        const dot = statusEl.querySelector('.status-dot');
-        dot.style.animation = 'none';
-        dot.style.background = 'var(--rose)';
-        dot.style.opacity = '0.7';
-      } else {
-        statusEl.style.display = 'none';
+        // Modal Body mein Grid render karna
+        mBody.innerHTML = `
+    <div class="blog-grid">
+      ${filtered.map(b => `
+        <div class="story-card" style="width: 100%; min-height: 180px;" onclick="window.location.href='blog.html?id=${b.id}'">
+          <span class="card-tag">${b.tag}</span>
+          <div class="card-title" style="font-size: 1.1rem; color: #f9f5f5;">${b.title}</div>
+          <div class="card-excerpt" style="font-size: 0.75rem;">${b.excerpt}</div>
+          <div class="btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.55rem; margin-top: auto; display: inline-block;">READ BLOG →</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+        locked = true;
+        document.getElementById('modalBackdrop').classList.add('open');
+        bMo.classList.add('open');
       }
 
-      const html = `
-        <div class="cards-row">
-          ${BLOGS.map((b, i) => `
-            <div class="story-card" data-blog="${i}">
-              <span class="card-tag">${b.tag}</span>
-              <div class="card-title">${escHtml(b.title)}</div>
-              <div class="card-excerpt">${escHtml(b.excerpt || '')}</div>
-              <div class="card-author">
-                <div class="avatar" style="background:${b.avatarGrad};">${escHtml(b.avatar)}</div>
-                <span class="card-name">${escHtml(b.author)}</span>
-              </div>
-            </div>
-          `).join('')}
-        </div>`;
+      // UI Events binding (Cursor etc)
+      function bindUIEvents() {
+        document.querySelectorAll('.story-card, button, a').forEach(el => {
+          el.addEventListener('mouseenter', () => {
+            cursor.style.width = '24px'; cursor.style.height = '24px';
+            cursor.style.background = '#ff3898';
+            cring.style.width = '56px'; cring.style.height = '56px';
+          });
+          el.addEventListener('mouseleave', () => {
+            cursor.style.width = '12px'; cursor.style.height = '12px';
+            cursor.style.background = '#ff3898';
+            cring.style.width = '36px'; cring.style.height = '36px';
+          });
+        });
 
-      container.innerHTML = html;
-      bindCardEvents();   // re-attach click + cursor handlers
-    }
+        document.querySelectorAll('.category-card').forEach(card => {
+          card.addEventListener('click', () => openCategoryModal(card.dataset.category));
+        });
+      }
+
+      // Init calls
+      window.addEventListener('DOMContentLoaded', () => {
+        renderCategories();
+      });
 
     // ── Render error state ─────────────────────────────────────────
     function renderCardsError(msg) {
@@ -2837,38 +2877,32 @@
       return wrap.innerHTML;
     }
 
-    async function openModal(id) {
-      const b = BLOGS[id]; aid = id; lk = false; lc = b.likes; co = false;
-      cSec.style.display = 'none'; rSb.classList.remove('open');
-      document.getElementById('mTag').textContent = b.tag;
-      document.getElementById('mTitle').textContent = b.title;
-      document.getElementById('mAuthor').textContent = b.author;
-      document.getElementById('mDate').textContent = b.date;
-      document.getElementById('mReadTime').textContent = b.readTime;
-      document.getElementById('mBody').innerHTML = sanitizeBodyHtml(b.body);
-      const av = document.getElementById('mAvatar'); av.textContent = b.avatar; av.style.background = b.avatarGrad;
-      lCnt.textContent = lc; lBtn.classList.remove('liked');
+    function openCategoryModal(categorySlug) {
+        const filteredBlogs = BLOGS.filter(b => b.tag.toLowerCase().includes(categorySlug));
+        const mBody = document.getElementById('mBody');
+        const mTitle = document.getElementById('mTitle');
 
-      // Render fallback comments first, then replace with live ones
-      const renderComments = (list) => {
-        cLst.innerHTML = list.map(c =>
-          `<div class="comment-item"><div class="comment-user">${escHtml(c.user)}</div><div class="comment-text">${escHtml(c.text)}</div></div>`
-        ).join('');
-      };
-      renderComments(b.comments || []);
+        mTitle.textContent = categorySlug.toUpperCase();
+        document.getElementById('recentSidebar').style.display = 'none'; // Sidebar ki zaroorat nahi grid mein
 
-      rLi.innerHTML = BLOGS.filter(x => x.id !== id).map(x => `<div class="recent-item" data-bid="${x.id}"><div class="recent-tag">${x.tag}</div><div class="recent-title">${escHtml(x.title)}</div><div class="recent-author">${escHtml(x.author)} · ${x.readTime}</div></div>`).join('');
-      rLi.querySelectorAll('.recent-item').forEach(el => el.addEventListener('click', () => openModal(parseInt(el.dataset.bid))));
-      document.getElementById('modalContentWrap').scrollTop = 0;
-      locked = true;
-      mBd.classList.add('open');
-      requestAnimationFrame(() => bMo.classList.add('open'));
-      if (cur !== 3) { sp = 3 / (SECTIONS - 1); updateSec(); }
+        // Grid HTML
+        mBody.innerHTML = `
+    <div class="blog-grid">
+      ${filteredBlogs.map(b => `
+        <div class="story-card" onclick="window.location.href='blog.html?id=${b.id}'">
+          <span class="card-tag">${b.tag}</span>
+          <div class="card-title" style="font-size: 1.2rem;">${b.title}</div>
+          <div class="card-excerpt">${b.excerpt}</div>
+          <div class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.6rem;">READ MORE</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 
-      // Fetch live comments in background and replace if found
-      const liveComments = await fetchCommentsForPost(b.postId || String(id));
-      if (liveComments && liveComments.length > 0) renderComments(liveComments);
-    }
+        locked = true;
+        document.getElementById('modalBackdrop').classList.add('open');
+        document.getElementById('blogModal').classList.add('open');
+      }
 
     function closeModal() {
       bMo.classList.remove('open'); mBd.classList.remove('open'); rSb.classList.remove('open');
